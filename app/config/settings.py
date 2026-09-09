@@ -27,7 +27,7 @@ class AppSettings:
         # Application info
         self.app_name = "AccountingSystem"
         self.app_name_ar = "نظام المحاسبة"
-        self.app_version = "1.0.1"
+        self.app_version = "1.0.0"
         self.organization_name = "AccountingSystem"
         
         # Base directories

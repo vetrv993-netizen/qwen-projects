@@ -136,17 +136,11 @@ def main():
     login_window = LoginWindow(auth_service, settings)
     
     def on_login_success(user, business_type):
-        # Authentication has already succeeded at this point. Build the main
-        # window before closing login, and keep login visible if UI startup fails
-        # so the user never gets a misleading "login failed" impression.
-        try:
-            main_window = MainWindow(db, auth_service, user, settings, business_type)
-        except Exception as exc:
-            logger.exception("Post-login UI initialization failed for user '%s'", user.username)
-            login_window._show_error("تم تسجيل الدخول بنجاح، لكن تعذر فتح النظام. تم إبقاء شاشة الدخول مفتوحة.")
-            login_window.login_button.setEnabled(True)
-            login_window.login_button.setText("دخول")
-            return
+        # Create and retain the main window before closing the login window.
+        # Closing the only visible top-level window first can trigger
+        # QApplication's lastWindowClosed/quit handling while the new window
+        # is still being constructed.
+        main_window = MainWindow(db, auth_service, user, settings, business_type)
         app._main_window = main_window
         main_window.show()
         login_window.close()

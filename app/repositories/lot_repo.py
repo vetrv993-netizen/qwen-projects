@@ -17,17 +17,8 @@ class LotRepository:
     def get_by_id(self, lot_id: int) -> Optional[dict]:
         return self.db.fetch_one('SELECT * FROM inventory_lots WHERE id=?', (lot_id,))
 
-    def has_lots(self, product_id: int, branch_id: int = None) -> bool:
-        if branch_id:
-            row = self.db.fetch_one(
-                'SELECT 1 AS x FROM inventory_lots WHERE product_id=? AND branch_id=? AND is_active=1 LIMIT 1',
-                (product_id, branch_id),
-            )
-        else:
-            row = self.db.fetch_one(
-                'SELECT 1 AS x FROM inventory_lots WHERE product_id=? AND is_active=1 LIMIT 1',
-                (product_id,),
-            )
+    def has_lots(self, product_id: int) -> bool:
+        row = self.db.fetch_one('SELECT 1 AS x FROM inventory_lots WHERE product_id=? AND is_active=1 LIMIT 1', (product_id,))
         return row is not None
 
     def get_available_fefo(self, product_id: int, branch_id: int = None) -> List[dict]:
@@ -36,10 +27,7 @@ class LotRepository:
                  AND (expiry_date IS NULL OR date(expiry_date) >= date('now'))"""
         params = [product_id]
         if branch_id:
-            # NULL branch lots are legacy/shared stock and remain sellable from
-            # the current branch for backward compatibility. New purchases are
-            # assigned to the current branch explicitly.
-            sql += ' AND (branch_id=? OR branch_id IS NULL)'
+            sql += ' AND branch_id=?'
             params.append(branch_id)
         sql += " ORDER BY CASE WHEN expiry_date IS NULL THEN 1 ELSE 0 END, expiry_date ASC, id ASC"
         return self.db.fetch_all(sql, tuple(params))

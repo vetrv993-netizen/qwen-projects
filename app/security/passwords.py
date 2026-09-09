@@ -21,10 +21,13 @@ def generate_salt() -> str:
     Note: bcrypt generates its own salt internally, but we store
     an additional application-level salt for defense in depth.
     
+    We use a short salt (8 hex chars = 4 bytes) to ensure the total
+    length (salt + password) stays within bcrypt's 72-byte limit.
+    
     Returns:
         Hex-encoded random salt string
     """
-    return secrets.token_hex(32)
+    return secrets.token_hex(4)  # 8 characters
 
 
 def hash_password(password: str, salt: str = None) -> Tuple[str, str]:

@@ -1,8 +1,11 @@
+from typing import Optional
 from app.repositories.accounting_repo import AccountingRepository
 from app.database.connection import DatabaseManager
+from app.security.permission_enforcer import PermissionEnforcer, PermissionError
+from app.security.permissions import Permission
 
 class AccountingService:
-    def __init__(self, db: DatabaseManager):
+    def __init__(self, db: DatabaseManager, current_user_id: Optional[int] = None):
         self.db=db
         self.repo=AccountingRepository(db)
 

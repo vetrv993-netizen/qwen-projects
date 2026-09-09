@@ -56,7 +56,7 @@ class TestPasswordHashing:
         hashed, salt = hash_password(password)
         
         assert hashed != password
-        assert len(salt) == 64  # 32 bytes hex
+        assert len(salt) == 8  # 4 bytes hex (reduced from 64 to fit bcrypt 72-byte limit)
         assert verify_password(password, hashed, salt)
     
     def test_wrong_password(self):
