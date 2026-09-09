@@ -1,0 +1,33 @@
+workspace_app_fixed — repair report
+===================================
+
+Source:
+  workspace (43).tar
+
+Confirmed repairs:
+1. main.py
+   - QFont.FontStylePreference.PreferAntialias -> QFont.StyleStrategy.PreferAntialias
+   - MainWindow is created/retained/shown before LoginWindow is closed.
+
+2. app/ui/main_window.py
+   - POS selection behavior corrected to SelectionBehavior.SelectRows.
+   - Removed recursive totals_layout.addLayout(totals_layout).
+   - _totals_row() now accepts parent_layout and explicitly attaches its row layout.
+   - Return shape remains (label_widget, value_widget), preserving existing [1].setText() uses.
+
+3. assets/icon.ico
+   - Generated application icon included.
+
+4. build.bat
+   - Updated to require/use Python 3.11.x explicitly.
+   - Uses venv311.
+   - Stops the build when tests fail.
+
+Verification in this environment:
+- Python AST/syntax compilation: PASS for all Python source files.
+- Static inspection of repaired Qt calls: PASS.
+- Windows/PySide6 GUI runtime test: NOT POSSIBLE in this Linux environment.
+- Windows EXE build: NOT POSSIBLE in this Linux environment.
+- pytest suite: NOT RUN because this environment cannot download required packages.
+
+Therefore this package is repaired statically but still requires Windows runtime validation.

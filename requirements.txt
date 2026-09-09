@@ -1,0 +1,21 @@
+# ============================================
+# Requirements for Accounting Desktop Application
+# All packages selected for prebuilt Windows wheel availability.
+# No packages requiring MSVC/C++/Rust compilation.
+# ============================================
+
+# Desktop GUI framework (prebuilt wheels for Windows)
+PySide6==6.7.3
+
+# Password hashing — bcrypt has reliable prebuilt wheels
+bcrypt==4.2.1
+
+# Testing
+pytest==8.3.4
+pytest-cov==6.0.0
+
+# PyInstaller for EXE packaging (prebuilt wheel)
+pyinstaller==6.11.1
+
+# Utilities
+python-dateutil==2.9.0

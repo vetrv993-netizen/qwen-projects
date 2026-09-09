@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>نظام المحاسبة — تطبيق سطح مكتب Python/PySide6</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        font-family: 'Cairo', sans-serif;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: #e2e8f0;
+        min-height: 100vh;
+        direction: rtl;
+      }
+      .container { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+      .header {
+        text-align: center;
+        padding: 60px 20px;
+        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+        border-radius: 20px;
+        margin-bottom: 40px;
+        box-shadow: 0 20px 60px rgba(37, 99, 235, 0.3);
+      }
+      .header h1 { font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 10px; }
+      .header p { font-size: 1.2rem; color: rgba(255,255,255,0.8); }
+      .badge {
+        display: inline-block;
+        background: rgba(255,255,255,0.2);
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        margin-top: 15px;
+        color: white;
+      }
+      .warning-box {
+        background: #fef3c7;
+        border: 2px solid #f59e0b;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+        color: #92400e;
+      }
+      .warning-box h3 { color: #d97706; margin-bottom: 8px; font-size: 1.1rem; }
+      .card {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+        backdrop-filter: blur(10px);
+      }
+      .card h2 {
+        color: #60a5fa;
+        font-size: 1.3rem;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .tech-stack {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .tech-item {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 10px;
+        padding: 12px 16px;
+        text-align: center;
+      }
+      .tech-item strong { color: #60a5fa; display: block; margin-bottom: 4px; }
+      .tech-item span { font-size: 0.85rem; color: #94a3b8; }
+      .steps {
+        background: rgba(0,0,0,0.3);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 16px;
+        font-family: 'Courier New', monospace;
+        direction: ltr;
+        text-align: left;
+        color: #a5f3fc;
+        line-height: 1.8;
+      }
+      .steps .comment { color: #6b7280; }
+      .steps .cmd { color: #34d399; }
+      .demo-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .demo-card {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+      }
+      .demo-card .icon { font-size: 2rem; margin-bottom: 8px; }
+      .demo-card .name { font-weight: 700; color: white; }
+      .demo-card .desc { font-size: 0.85rem; color: #94a3b8; margin-top: 4px; }
+      .features-list {
+        list-style: none;
+        padding: 0;
+      }
+      .features-list li {
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .features-list li:last-child { border-bottom: none; }
+      .check { color: #34d399; font-weight: bold; }
+      .footer {
+        text-align: center;
+        padding: 30px;
+        color: #64748b;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div style="font-size: 4rem; margin-bottom: 16px;">📊</div>
+        <h1>نظام المحاسبة وإدارة الأعمال</h1>
+        <p>تطبيق سطح مكتب أصلي مبني بـ Python و PySide6</p>
+        <div class="badge">🖥️ Native Desktop Application — NOT a Web App</div>
+      </div>
+
+      <div class="warning-box">
+        <h3>⚠️ ملاحظة مهمة</h3>
+        <p>
+          هذا المشروع هو <strong>تطبيق سطح مكتب أصلي</strong> مبني بـ Python/PySide6/SQLite.
+          <br>
+          هذه الصفحة هي فقط لتوثيق المشروع. التطبيق الفعلي يعمل كـ EXE مستقل على Windows.
+          <br><br>
+          <strong>للتشغيل:</strong> <code>python main.py</code> أو <code>build.bat</code> لبناء EXE
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>🔧 التقنيات المستخدمة</h2>
+        <div class="tech-stack">
+          <div class="tech-item">
+            <strong>Python 3.10+</strong>
+            <span>لغة البرمجة الأساسية</span>
+          </div>
+          <div class="tech-item">
+            <strong>PySide6</strong>
+            <span>واجهة سطح المكتب</span>
+          </div>
+          <div class="tech-item">
+            <strong>SQLite</strong>
+            <span>قاعدة البيانات المحلية</span>
+          </div>
+          <div class="tech-item">
+            <strong>bcrypt</strong>
+            <span>تشفير كلمات المرور</span>
+          </div>
+          <div class="tech-item">
+            <strong>PyInstaller</strong>
+            <span>بناء ملف EXE</span>
+          </div>
+          <div class="tech-item">
+            <strong>pytest</strong>
+            <span>اختبارات تلقائية</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>🚀 كيفية التشغيل</h2>
+        <div class="steps">
+          <span class="comment"># تثبيت المتطلبات</span><br>
+          <span class="cmd">pip install -r requirements.txt</span><br><br>
+          <span class="comment"># تشغيل التطبيق مباشرة</span><br>
+          <span class="cmd">python main.py</span><br><br>
+          <span class="comment"># أو بناء ملف EXE مستقل</span><br>
+          <span class="cmd">build.bat</span><br>
+          <span class="comment"># الناتج: dist\AccountingSystem.exe</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>🎮 الحسابات التجريبية</h2>
+        <p style="color: #94a3b8; margin-bottom: 12px;">اختر نوع النشاط التجاري لبدء البيانات التجريبية:</p>
+        <div class="demo-grid">
+          <div class="demo-card">
+            <div class="icon">🛒</div>
+            <div class="name">سوبرماركت</div>
+            <div class="desc">بقالة، مشروبات، منظفات</div>
+          </div>
+          <div class="demo-card">
+            <div class="icon">💊</div>
+            <div class="name">صيدلية</div>
+            <div class="desc">أدوية، مستلزمات طبية</div>
+          </div>
+          <div class="demo-card">
+            <div class="icon">🍽️</div>
+            <div class="name">مطعم</div>
+            <div class="desc">أطباق، مشروبات، حلويات</div>
+          </div>
+          <div class="demo-card">
+            <div class="icon">🏨</div>
+            <div class="name">فندق</div>
+            <div class="desc">غرف، خدمات، ضيافة</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>✨ المميزات</h2>
+        <ul class="features-list">
+          <li><span class="check">✓</span> نقطة بيع (POS) سريعة مع دعم الباركود</li>
+          <li><span class="check">✓</span> إدارة المبيعات والمشتريات</li>
+          <li><span class="check">✓</span> إدارة المخزون مع تنبيهات النفاد</li>
+          <li><span class="check">✓</span> إدارة العملاء والموردين</li>
+          <li><span class="check">✓</span> تقارير شاملة مع رسوم بيانية</li>
+          <li><span class="check">✓</span> فواتير احترافية قابلة للطباعة</li>
+          <li><span class="check">✓</span> نظام صلاحيات متعدد الأدوار</li>
+          <li><span class="check">✓</span> نسخ احتياطي واستعادة</li>
+          <li><span class="check">✓</span> واجهة عربية RTL كاملة</li>
+          <li><span class="check">✓</span> يعمل بدون إنترنت</li>
+          <li><span class="check">✓</span> قاعدة بيانات SQLite محلية</li>
+          <li><span class="check">✓</span> ملف EXE مستقل بدون تثبيت Python</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>📁 هيكل المشروع</h2>
+        <div class="steps">
+          project/<br>
+          ├── main.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># نقطة الدخول</span><br>
+          ├── build.bat &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># سكريبت البناء</span><br>
+          ├── app.spec &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># إعدادات PyInstaller</span><br>
+          ├── requirements.txt &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># المتطلبات</span><br>
+          ├── app/<br>
+          │ &nbsp; ├── ui/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># واجهة PySide6</span><br>
+          │ &nbsp; ├── services/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># خدمات التطبيق</span><br>
+          │ &nbsp; ├── repositories/ &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># طبقة البيانات</span><br>
+          │ &nbsp; ├── database/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># SQLite</span><br>
+          │ &nbsp; ├── security/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># الأمان</span><br>
+          │ &nbsp; └── config/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># الإعدادات</span><br>
+          ├── database/migrations/ <span class="comment"># ملفات الترحيل</span><br>
+          ├── tests/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># الاختبارات</span><br>
+          └── assets/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># الأيقونات</span>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>نظام المحاسبة وإدارة الأعمال — الإصدار 1.0</p>
+        <p>تطبيق سطح مكتب أصلي — Python + PySide6 + SQLite</p>
+      </div>
+    </div>
+  </body>
+</html>
