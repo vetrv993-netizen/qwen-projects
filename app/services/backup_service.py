@@ -16,6 +16,8 @@ from datetime import datetime
 from pathlib import Path
 
 from app.database.connection import DatabaseManager
+from app.security.permission_enforcer import PermissionEnforcer, PermissionError
+from app.security.permissions import Permission
 
 
 logger = logging.getLogger(__name__)
@@ -29,7 +31,7 @@ class BackupService:
     destroy the active database during a failed restore.
     """
     
-    def __init__(self, db: DatabaseManager, backup_dir: str):
+    def __init__(self, db: DatabaseManager, backup_dir: str, current_user_id: Optional[int] = None):
         """
         Initialize backup service.
         
@@ -38,6 +40,12 @@ class BackupService:
             backup_dir: Directory for storing backups
         """
         self.db = db
+        # Initialize permission enforcer if user is provided
+        self.current_user_id = current_user_id
+        if current_user_id:
+            self.enforcer = PermissionEnforcer(db, current_user_id)
+        else:
+            self.enforcer = None
         self.backup_dir = backup_dir
         
         # Ensure backup directory exists

@@ -6,6 +6,8 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime
 
 from app.database.connection import DatabaseManager
+from app.security.permission_enforcer import PermissionEnforcer, PermissionError
+from app.security.permissions import Permission
 from app.repositories.purchase_repo import PurchaseRepository
 from app.repositories.product_repo import ProductRepository
 from app.repositories.supplier_repo import SupplierRepository
@@ -20,8 +22,14 @@ logger = logging.getLogger(__name__)
 class PurchaseService:
     """Business logic for purchase operations."""
     
-    def __init__(self, db: DatabaseManager):
+    def __init__(self, db: DatabaseManager, current_user_id: Optional[int] = None):
         self.db = db
+        # Initialize permission enforcer if user is provided
+        self.current_user_id = current_user_id
+        if current_user_id:
+            self.enforcer = PermissionEnforcer(db, current_user_id)
+        else:
+            self.enforcer = None
         self.purchase_repo = PurchaseRepository(db)
         self.product_repo = ProductRepository(db)
         self.supplier_repo = SupplierRepository(db)

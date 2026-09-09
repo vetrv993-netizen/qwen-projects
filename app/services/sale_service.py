@@ -12,6 +12,8 @@ from app.repositories.customer_repo import CustomerRepository
 from app.repositories.inventory_repo import InventoryRepository
 from app.repositories.outbox_repo import OutboxRepository
 from app.repositories.lot_repo import LotRepository
+from app.security.permission_enforcer import PermissionEnforcer, PermissionError
+from app.security.permissions import Permission
 
 
 logger = logging.getLogger(__name__)
@@ -20,7 +22,7 @@ logger = logging.getLogger(__name__)
 class SaleService:
     """Business logic for sales operations."""
     
-    def __init__(self, db: DatabaseManager):
+    def __init__(self, db: DatabaseManager, current_user_id: Optional[int] = None):
         self.db = db
         self.sale_repo = SaleRepository(db)
         self.product_repo = ProductRepository(db)
@@ -30,6 +32,13 @@ class SaleService:
         self.lot_repo = LotRepository(db)
         from app.services.accounting_service import AccountingService
         self.accounting_service = AccountingService(db)
+        
+        # Initialize permission enforcer if user is provided
+        self.current_user_id = current_user_id
+        if current_user_id:
+            self.enforcer = PermissionEnforcer(db, current_user_id)
+        else:
+            self.enforcer = None
     
     def create_sale(
         self,

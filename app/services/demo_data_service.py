@@ -2,11 +2,13 @@
 Demo data service - generates realistic demo data for different business types.
 """
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
 import random
 
 from app.database.connection import DatabaseManager
+from app.security.permission_enforcer import PermissionEnforcer, PermissionError
+from app.security.permissions import Permission
 from app.repositories.product_repo import ProductRepository
 from app.repositories.category_repo import CategoryRepository
 from app.repositories.customer_repo import CustomerRepository
@@ -21,8 +23,14 @@ logger = logging.getLogger(__name__)
 class DemoDataService:
     """Generates realistic demo data for different business types."""
     
-    def __init__(self, db: DatabaseManager):
+    def __init__(self, db: DatabaseManager, current_user_id: Optional[int] = None):
         self.db = db
+        # Initialize permission enforcer if user is provided
+        self.current_user_id = current_user_id
+        if current_user_id:
+            self.enforcer = PermissionEnforcer(db, current_user_id)
+        else:
+            self.enforcer = None
         self.product_repo = ProductRepository(db)
         self.category_repo = CategoryRepository(db)
         self.customer_repo = CustomerRepository(db)
