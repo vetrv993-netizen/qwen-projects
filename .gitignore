@@ -1,9 +1,49 @@
+```
+# Dependencies
 node_modules/
-.next/
+venv/
+.venv/
+
+# Build artifacts
 dist/
 build/
+*.pyc
+__pycache__/
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# Logs
 *.log
 
-venv311/
+# Python
+*.pyc
 __pycache__/
-.pytest_cache/
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git/modules/
+.DS_Store
+*.swp
+*.swo
+*~
+```
