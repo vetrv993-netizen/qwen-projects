@@ -71,7 +71,7 @@ class ReportsService:
 
     def low_stock(self, limit=200):
         return self.db.fetch_all(
-            """SELECT id, name_ar, barcode, stock_quantity, min_stock, cost_price, selling_price
+            """SELECT id, name_ar, barcode, stock_quantity, min_stock, cost_price, sell_price
                FROM products WHERE is_active=1 AND stock_quantity <= COALESCE(min_stock,0)
                ORDER BY stock_quantity ASC, name_ar ASC LIMIT ?""", (int(limit),)
         )

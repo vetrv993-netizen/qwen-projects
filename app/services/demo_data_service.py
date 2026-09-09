@@ -29,13 +29,6 @@ class DemoDataService:
         self.supplier_repo = SupplierRepository(db)
         self.sale_service = SaleService(db)
         self.purchase_service = PurchaseService(db)
-
-    def _current_branch_id(self):
-        row = self.db.fetch_one("SELECT value FROM settings WHERE key='current_branch_id' LIMIT 1")
-        try:
-            return int(row['value']) if row and row.get('value') else None
-        except (TypeError, ValueError):
-            return None
     
     def generate_supermarket_data(self):
         """Generate realistic supermarket demo data."""
@@ -104,16 +97,6 @@ class DemoDataService:
                 min_stock=10,
             )
             product_ids[name_en] = prod_id
-            opening_qty = self.product_repo.get_by_id(prod_id)['stock_quantity'] or 0
-            if opening_qty > 0:
-                self.db.insert('inventory_lots', {
-                    'product_id': prod_id, 'branch_id': self._current_branch_id(),
-                    'lot_number': f'OPEN-{prod_id}', 'expiry_date': None,
-                    'unit_cost': cost, 'initial_quantity': opening_qty,
-                    'current_quantity': opening_qty,
-                    'received_at': datetime.now().isoformat(), 'is_active': 1,
-                    'created_at': datetime.now().isoformat(), 'updated_at': datetime.now().isoformat()
-                })
         
         # Customers
         customers_data = [
@@ -172,29 +155,28 @@ class DemoDataService:
                 except Exception as e:
                     logger.warning(f"Failed to create demo purchase: {e}")
 
-        # Generate 10 reliable demo sales. Keep each sale on distinct products
-        # and use small quantities so the generated dataset is deterministic enough
-        # to exercise the sales flow without random stock exhaustion.
+        # Generate some sales
         all_products = self.product_repo.get_all()
-        for sale_index in range(10):
-            candidates = all_products[sale_index % len(all_products):] + all_products[:sale_index % len(all_products)]
+        for _ in range(10):
             items = []
-            for product in candidates[:3]:
+            num_items = random.randint(2, 5)
+            for _ in range(num_items):
+                product = random.choice(all_products)
                 items.append({
                     'product_id': product['id'],
-                    'quantity': 1,
+                    'quantity': random.randint(1, 5),
                     'unit_price': product['selling_price'],
                     'discount': 0,
                 })
+            
             try:
-                total_paid = sum(i['unit_price'] * i['quantity'] for i in items)
                 self.sale_service.create_sale(
                     items=items,
-                    paid_amount=total_paid,
+                    paid_amount=sum(i['unit_price'] * i['quantity'] for i in items),
                     payment_method='cash',
                 )
             except Exception as e:
-                logger.warning(f"Failed to create demo sale #{sale_index + 1}: {e}")
+                logger.warning(f"Failed to create demo sale: {e}")
         
         logger.info("Supermarket demo data generated successfully")
     

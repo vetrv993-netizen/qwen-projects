@@ -1566,7 +1566,7 @@ class MainWindow(QMainWindow):
         low=QWidget(); ll=QVBoxLayout(low); lt=self._table(['المنتج','الباركود','المخزون','الحد الأدنى','التكلفة','سعر البيع']); ll.addWidget(lt,1)
         rows=self.reports_service.low_stock(); lt.setRowCount(len(rows))
         for r,x in enumerate(rows):
-            vals=[x['name_ar'],x.get('barcode') or '-',f"{x['stock_quantity']:,.2f}",f"{x.get('min_stock') or 0:,.2f}",f"﷼ {x['cost_price']:,.2f}",f"﷼ {x['selling_price']:,.2f}"]
+            vals=[x['name_ar'],x.get('barcode') or '-',f"{x['stock_quantity']:,.2f}",f"{x.get('min_stock') or 0:,.2f}",f"﷼ {x['cost_price']:,.2f}",f"﷼ {x['sell_price']:,.2f}"]
             for c,v in enumerate(vals): lt.setItem(r,c,QTableWidgetItem(str(v)))
         tabs.addTab(low,'المخزون المنخفض')
 

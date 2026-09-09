@@ -49,8 +49,6 @@ class SaleService:
         """
         if not items:
             raise ValueError("لا يمكن إنشاء فاتورة بدون منتجات")
-        if discount_amount < 0 or tax_rate < 0 or paid_amount < 0:
-            raise ValueError("الخصم والضريبة والمدفوع لا يمكن أن تكون سالبة")
         
         with self.db.transaction():
             # Calculate totals
@@ -62,31 +60,19 @@ class SaleService:
                 if not product:
                     raise ValueError(f"المنتج غير موجود: {item['product_id']}")
                 
-                quantity = float(item.get('quantity', 0))
-                if quantity <= 0:
-                    raise ValueError("كمية البيع يجب أن تكون أكبر من صفر")
-                if product['stock_quantity'] < quantity:
+                if product['stock_quantity'] < item['quantity']:
                     raise ValueError(f"الكمية غير متوفرة للمنتج: {product['name_ar']}")
                 if product.get('expiry_date'):
                     try:
-                        branch_row = self.db.fetch_one("SELECT value FROM settings WHERE key='current_branch_id' LIMIT 1")
-                        try:
-                            branch_id = int(branch_row['value']) if branch_row and branch_row.get('value') else None
-                        except (TypeError, ValueError):
-                            branch_id = None
-                        if date.fromisoformat(str(product['expiry_date'])) < date.today() and not self.lot_repo.has_lots(product['id'], branch_id=branch_id):
+                        if date.fromisoformat(str(product['expiry_date'])) < date.today() and not self.lot_repo.has_lots(product['id']):
                             raise ValueError(f"لا يمكن بيع المنتج منتهي الصلاحية: {product['name_ar']}")
                     except ValueError as exc:
                         if 'لا يمكن بيع المنتج' in str(exc):
                             raise
                 
-                unit_price = float(item.get('unit_price', product['selling_price']))
-                item_discount = float(item.get('discount', 0))
-                if unit_price < 0 or item_discount < 0:
-                    raise ValueError("سعر البيع والخصم لا يمكن أن يكونا سالبين")
-                item_subtotal = (unit_price * quantity) - item_discount
-                if item_subtotal < 0:
-                    raise ValueError("خصم الصنف يتجاوز قيمة الصنف")
+                unit_price = item.get('unit_price', product['selling_price'])
+                item_discount = item.get('discount', 0)
+                item_subtotal = (unit_price * item['quantity']) - item_discount
                 subtotal += item_subtotal
                 
                 tax_amount = item_subtotal * (tax_rate / 100)
@@ -94,7 +80,7 @@ class SaleService:
                 
                 sale_items_data.append({
                     'product_id': item['product_id'],
-                    'quantity': quantity,
+                    'quantity': item['quantity'],
                     'unit_price': unit_price,
                     'discount_amount': item_discount,
                     'tax_amount': tax_amount,
@@ -138,13 +124,8 @@ class SaleService:
                 # Update product stock and allocate FEFO lots when available.
                 self.product_repo.update_stock(item_data['product_id'], -item_data['quantity'])
                 remaining_qty = float(item_data['quantity'])
-                branch_row = self.db.fetch_one("SELECT value FROM settings WHERE key='current_branch_id' LIMIT 1")
-                try:
-                    branch_id = int(branch_row['value']) if branch_row and branch_row.get('value') else None
-                except (TypeError, ValueError):
-                    branch_id = None
-                lots = self.lot_repo.get_available_fefo(item_data['product_id'], branch_id=branch_id)
-                if self.lot_repo.has_lots(item_data['product_id'], branch_id=branch_id) and not lots:
+                lots = self.lot_repo.get_available_fefo(item_data['product_id'])
+                if self.lot_repo.has_lots(item_data['product_id']) and not lots:
                     raise ValueError(f"لا يمكن بيع منتج منتهي الصلاحية أو لا توجد دفعات صالحة: {product['name_ar']}")
                 for lot in lots:
                     if remaining_qty <= 0.00001:

@@ -49,8 +49,6 @@ class PurchaseService:
         """
         if not items:
             raise ValueError("لا يمكن إنشاء فاتورة شراء بدون منتجات")
-        if discount_amount < 0 or tax_rate < 0 or paid_amount < 0:
-            raise ValueError("الخصم والضريبة والمدفوع لا يمكن أن تكون سالبة")
         
         with self.db.transaction():
             subtotal = 0
@@ -61,16 +59,9 @@ class PurchaseService:
                 if not product:
                     raise ValueError(f"المنتج غير موجود: {item['product_id']}")
                 
-                quantity = float(item.get('quantity', 0))
-                if quantity <= 0:
-                    raise ValueError("كمية الشراء يجب أن تكون أكبر من صفر")
-                unit_cost = float(item.get('unit_cost', product['cost_price']))
-                item_discount = float(item.get('discount', 0))
-                if unit_cost < 0 or item_discount < 0:
-                    raise ValueError("التكلفة والخصم لا يمكن أن تكون سالبة")
-                item_subtotal = (unit_cost * quantity) - item_discount
-                if item_subtotal < 0:
-                    raise ValueError("خصم الصنف يتجاوز قيمة الصنف")
+                unit_cost = item.get('unit_cost', product['cost_price'])
+                item_discount = item.get('discount', 0)
+                item_subtotal = (unit_cost * item['quantity']) - item_discount
                 subtotal += item_subtotal
                 
                 tax_amount = item_subtotal * (tax_rate / 100)
@@ -78,13 +69,11 @@ class PurchaseService:
                 
                 purchase_items_data.append({
                     'product_id': item['product_id'],
-                    'quantity': quantity,
+                    'quantity': item['quantity'],
                     'unit_cost': unit_cost,
                     'discount_amount': item_discount,
                     'tax_amount': tax_amount,
                     'total_cost': total_cost,
-                    '_lot_number': (item.get('lot_number') or '').strip() or None,
-                    '_expiry_date': item.get('expiry_date') or None,
                 })
             
             total_discount = discount_amount
@@ -119,22 +108,16 @@ class PurchaseService:
             
             # Add purchase items and update inventory
             for item_data in purchase_items_data:
-                purchase_item_payload = {k: v for k, v in item_data.items() if not k.startswith('_')}
-                purchase_item_id = self.purchase_repo.add_purchase_item(purchase_id=purchase_id, **purchase_item_payload)
+                purchase_item_id = self.purchase_repo.add_purchase_item(purchase_id=purchase_id, **item_data)
                 
                 # Every purchase creates a traceable stock lot. If the caller supplies
                 # a lot number/expiry, retain them; otherwise generate a lot reference.
-                lot_number = item_data.get('_lot_number') or f"PUR-{purchase_id}-{item_data['product_id']}"
-                branch_row = self.db.fetch_one("SELECT value FROM settings WHERE key='current_branch_id' LIMIT 1")
-                try:
-                    branch_id = int(branch_row['value']) if branch_row and branch_row.get('value') else None
-                except (TypeError, ValueError):
-                    branch_id = None
+                lot_number = item_data.get('lot_number') or f"PUR-{purchase_id}-{item_data['product_id']}"
                 lot_id = self.lot_repo.create(
                     product_id=item_data['product_id'],
-                    branch_id=branch_id,
+                    branch_id=None,
                     lot_number=lot_number,
-                    expiry_date=item_data.get('_expiry_date'),
+                    expiry_date=item_data.get('expiry_date'),
                     unit_cost=item_data['unit_cost'],
                     initial_quantity=item_data['quantity'],
                     current_quantity=item_data['quantity'],
